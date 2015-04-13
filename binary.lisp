@@ -21,10 +21,10 @@
 (defun uint-from-bytes (bin &key (endian :little))
   "Produce an unsigned integer from the binary array input."
   (let ((bin (cond
-	       ((eql endian :little) bin)
-	       ((eql endian :big)    (reverse bin))
-	       (t (error "Invalid endian specification."))))
-	(n 0))
+               ((eql endian :little) bin)
+               ((eql endian :big)    (reverse bin))
+               (t (error "Invalid endian specification."))))
+        (n 0))
     (dotimes (i (length bin))
       (setf n (+ n (ash (aref bin i) (* i 8)))))
     n))
@@ -35,7 +35,7 @@ provided."
   (let ((bin (make-array size :element-type '(unsigned-byte 8))))
     (dotimes (i size)
       (setf (aref bin i)
-	    (logand 255 (ash n (- 0 (* i 8))))))
+            (logand 255 (ash n (- 0 (* i 8))))))
     (cond
       ((eql endian :little) bin)
       ((eql endian :big)    (nreverse bin))
@@ -49,21 +49,21 @@ provided."
 
 (defmacro define-unsigned-reader (const-name)
   (let ((docstring
-	 (format nil
-		 "Read an unsigned ~A-bit integer from a stream."
-		 (subseq  (format nil "~A" const-name) 1))))
+         (format nil
+                 "Read an unsigned ~A-bit integer from a stream."
+                 (subseq  (format nil "~A" const-name) 1))))
     `(defun ,(intern (format nil "READ-~A" const-name))
-	 (stream &key (endian :little))
+         (stream &key (endian :little))
        ,docstring
        (read-uint stream ,const-name :endian endian))))
 
 (defmacro define-unsigned-writer (const-name)
   (let ((docstring
-	 (format nil
-		 "Write an unsigned ~A-bit integer to a stream."
-		 (subseq  (format nil "~A" const-name) 1))))
+         (format nil
+                 "Write an unsigned ~A-bit integer to a stream."
+                 (subseq  (format nil "~A" const-name) 1))))
     `(defun ,(intern (format nil "WRITE-~A" const-name))
-	 (stream n &key (endian :little))
+         (stream n &key (endian :little))
        ,docstring
        (write-uint stream n ,const-name :endian endian))))
 
@@ -84,7 +84,7 @@ provided."
 (defun int-from-bytes (bin &key (endian :little))
   "Produce a signed integer from the binary array input."
   (twos-complement (uint-from-bytes bin :endian endian)
-		   (length bin)))
+                   (length bin)))
 
 (defun int-to-bytes (n size &key (endian :little))
   "Produce a binary array of size bytes from the provided signed
@@ -93,29 +93,29 @@ integer."
 
 (defun read-int (stream size &key (endian :little))
   (int-from-bytes (octets stream size)
-		  :endian endian))
+                  :endian endian))
 
 (defun write-int (stream n size &key (endian :little))
   (write-sequence (int-to-bytes n size :endian endian)
-		  stream))
+                  stream))
 
 (defmacro define-signed-reader (const-name)
   (let ((docstring
-	 (format nil
-		 "Read a signed ~A-bit integer from a stream."
-		 (subseq  (format nil "~A" const-name) 1))))
+         (format nil
+                 "Read a signed ~A-bit integer from a stream."
+                 (subseq  (format nil "~A" const-name) 1))))
     `(defun ,(intern (format nil "READ-~A" const-name))
-	 (stream &key (endian :little))
+         (stream &key (endian :little))
        ,docstring
        (read-int stream ,const-name :endian endian))))
 
 (defmacro define-signed-writer (const-name)
   (let ((docstring
-	 (format nil
-		 "Write a signed ~A-bit integer to a stream."
-		 (subseq  (format nil "~A" const-name) 1))))
+         (format nil
+                 "Write a signed ~A-bit integer to a stream."
+                 (subseq  (format nil "~A" const-name) 1))))
     `(defun ,(intern (format nil "WRITE-~A" const-name))
-	 (stream n &key (endian :little))
+         (stream n &key (endian :little))
        ,docstring
        (write-int stream n ,const-name :endian endian))))
 
