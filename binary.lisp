@@ -5,13 +5,6 @@
 ;;; "binary" goes here. Hacks and glory await!
 
 
-(defconstant U32 4)
-(defconstant I32 4)
-(defconstant U16 2)
-(defconstant I16 2)
-(defconstant U8  1)
-(defconstant I8  1)
-
 (defun octets (stream length)
   "Read length bytes from the stream."
   (let ((bin (make-array length :element-type '(unsigned-byte 8))))
@@ -52,10 +45,10 @@ provided."
          (format nil
                  "Read an unsigned ~A-bit integer from a stream."
                  (subseq  (format nil "~A" const-name) 1))))
-    `(defun ,(intern (format nil "READ-~A" const-name))
+    `(export (defun ,(intern (format nil "READ-~A" const-name))
          (stream &key (endian :little))
        ,docstring
-       (read-uint stream ,const-name :endian endian))))
+       (read-uint stream ,const-name :endian endian)))))
 
 (defmacro define-unsigned-writer (const-name)
   (let ((docstring
@@ -67,14 +60,15 @@ provided."
        ,docstring
        (write-uint stream n ,const-name :endian endian))))
 
-(defmacro defunsigned (const-name)
+(defmacro defunsigned (const-name size)
   `(progn
+     (defconstant ,const-name ,size)
      (define-unsigned-reader ,const-name)
      (define-unsigned-writer ,const-name)))
 
-(defunsigned U32)
-(defunsigned U16)
-(defunsigned U8)
+(defunsigned U32 4)
+(defunsigned U16 2)
+(defunsigned U8 1)
 
 (defun twos-complement (n size)
   (if (zerop (logand (ash 1 (* (- size 1) 8)) n))
@@ -119,11 +113,12 @@ integer."
        ,docstring
        (write-int stream n ,const-name :endian endian))))
 
-(defmacro defsigned (const-name)
+(defmacro defsigned (const-name size)
   `(progn
+     (defconstant ,const-name ,size)
      (define-signed-reader ,const-name)
      (define-signed-writer ,const-name)))
 
-(defsigned I32)
-(defsigned I16)
-(defsigned I8)
+(defsigned I32 4)
+(defsigned I16 2)
+(defsigned I8 1)
