@@ -4,7 +4,6 @@
 
 ;;; "binary" goes here. Hacks and glory await!
 
-
 (defun octets (stream length)
   "Read length bytes from the stream."
   (let ((bin (make-array length :element-type '(unsigned-byte 8))))
@@ -40,36 +39,6 @@ provided."
 (defun write-uint (stream n size &key (endian :little))
   (write-sequence (uint-to-bytes n size :endian endian) stream))
 
-(defmacro define-unsigned-reader (const-name)
-  (let ((docstring
-         (format nil
-                 "Read an unsigned ~A-bit integer from a stream."
-                 (subseq  (format nil "~A" const-name) 1))))
-    `(export (defun ,(intern (format nil "READ-~A" const-name))
-         (stream &key (endian :little))
-       ,docstring
-       (read-uint stream ,const-name :endian endian)))))
-
-(defmacro define-unsigned-writer (const-name)
-  (let ((docstring
-         (format nil
-                 "Write an unsigned ~A-bit integer to a stream."
-                 (subseq  (format nil "~A" const-name) 1))))
-    `(defun ,(intern (format nil "WRITE-~A" const-name))
-         (stream n &key (endian :little))
-       ,docstring
-       (write-uint stream n ,const-name :endian endian))))
-
-(defmacro defunsigned (const-name size)
-  `(progn
-     (defconstant ,const-name ,size)
-     (define-unsigned-reader ,const-name)
-     (define-unsigned-writer ,const-name)))
-
-(defunsigned U32 4)
-(defunsigned U16 2)
-(defunsigned U8 1)
-
 (defun twos-complement (n size)
   (if (zerop (logand (ash 1 (* (- size 1) 8)) n))
       n
@@ -78,7 +47,7 @@ provided."
 (defun int-from-bytes (bin &key (endian :little))
   "Produce a signed integer from the binary array input."
   (twos-complement (uint-from-bytes bin :endian endian)
-                   (length bin)))
+		   (length bin)))
 
 (defun int-to-bytes (n size &key (endian :little))
   "Produce a binary array of size bytes from the provided signed
@@ -87,38 +56,53 @@ integer."
 
 (defun read-int (stream size &key (endian :little))
   (int-from-bytes (octets stream size)
-                  :endian endian))
+		  :endian endian))
 
 (defun write-int (stream n size &key (endian :little))
   (write-sequence (int-to-bytes n size :endian endian)
-                  stream))
+		  stream))
 
-(defmacro define-signed-reader (const-name)
-  (let ((docstring
+(defmacro define-reader (const-name)
+  (let* ((signed (equal #\I (elt (symbol-name const-name) 0)))
+	 (docstring
          (format nil
-                 "Read a signed ~A-bit integer from a stream."
-                 (subseq  (format nil "~A" const-name) 1))))
-    `(defun ,(intern (format nil "READ-~A" const-name))
-         (stream &key (endian :little))
-       ,docstring
-       (read-int stream ,const-name :endian endian))))
+                 "Read ~A ~Asigned ~A-bit integer from a stream."
+		 (if signed "a" "an")
+		 (if signed "" "un")
+		 (subseq (symbol-name const-name) 1))))
+    `(export
+      (defun ,(intern (format nil "READ-~A" const-name))
+	  (stream &key (endian :little))
+	,docstring
+	(,(if signed 'read-int 'read-uint) stream ,const-name :endian endian)))))
 
-(defmacro define-signed-writer (const-name)
-  (let ((docstring
+(defmacro define-writer (const-name)
+  (let* ((signed (equal #\I (elt (symbol-name const-name) 0)))
+	 (docstring
          (format nil
-                 "Write a signed ~A-bit integer to a stream."
-                 (subseq  (format nil "~A" const-name) 1))))
-    `(defun ,(intern (format nil "WRITE-~A" const-name))
-         (stream n &key (endian :little))
-       ,docstring
-       (write-int stream n ,const-name :endian endian))))
+                 "Write ~A ~Asigned ~A-bit integer to a stream."
+		 (if signed "a" "an")
+		 (if signed "" "un")
+		 (subseq (symbol-name const-name) 1))))
+    `(export
+      (defun ,(intern (format nil "WRITE-~A" const-name))
+	  (stream n &key (endian :little))
+	,docstring
+	(,(if signed 'write-int 'write-uint) stream n ,const-name :endian endian)))))
 
-(defmacro defsigned (const-name size)
-  `(progn
-     (defconstant ,const-name ,size)
-     (define-signed-reader ,const-name)
-     (define-signed-writer ,const-name)))
+(defmacro define-type (const-name)
+  (let ((size (/ (parse-integer (subseq (symbol-name const-name) 1)) 8)))
+   `(progn
+      (defconstant ,const-name ,size)
+      (export ',const-name :binary)
+      (define-reader ,const-name)
+      (define-writer ,const-name))))
 
-(defsigned I32 4)
-(defsigned I16 2)
-(defsigned I8 1)
+(define-type U64)
+(define-type I64)
+(define-type U32)
+(define-type I32)
+(define-type U16)
+(define-type I16)
+(define-type U8)
+(define-type I8)
