@@ -66,9 +66,8 @@ integer."
   (let* ((signed (equal #\I (elt (symbol-name const-name) 0)))
 	 (docstring
          (format nil
-                 "Read ~A ~Asigned ~A-bit integer from a stream."
-		 (if signed "a" "an")
-		 (if signed "" "un")
+                 "Read a~Asigned ~A-bit integer from a stream."
+		 (if signed " " "n un")
 		 (subseq (symbol-name const-name) 1))))
     `(export
       (defun ,(intern (format nil "READ-~A" const-name))
@@ -80,9 +79,8 @@ integer."
   (let* ((signed (equal #\I (elt (symbol-name const-name) 0)))
 	 (docstring
          (format nil
-                 "Write ~A ~Asigned ~A-bit integer to a stream."
-		 (if signed "a" "an")
-		 (if signed "" "un")
+                 "Write a~Asigned ~A-bit integer to a stream."
+		 (if signed " " "n un")
 		 (subseq (symbol-name const-name) 1))))
     `(export
       (defun ,(intern (format nil "WRITE-~A" const-name))
