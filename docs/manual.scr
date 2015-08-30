@@ -1,0 +1,72 @@
+@begin(section)
+@title(Index)
+
+@b(binary) contains functions for reading and writing integers from
+binary streams
+
+@begin(deflist)
+
+@term(Source)
+@begin(def)
+
+The source code may be obtained from
+@link[uri="https://github.com/kisom/binary/"](Github).
+
+@end(def)
+
+@term(Setup and Usage)
+@begin(def)
+
+@b(binary) requires
+@link[uri="https://quicklisp.org/"](Quicklisp). The repository should
+be cloned into the @c(local-projects) directory under the Quicklisp
+home.
+
+To use @b(kutils), either add it to the @c(:depends-on) section of
+your project's @c(.asd), or @c(ql:quickload :kutils).
+
+@end(def)
+
+@term(License)
+@begin(def)
+
+@b(binary) is released under the
+@link[uri="https://raw.githubusercontent.com/kisom/binary/master/LICENSE"](MIT)
+license.
+
+@end(def)
+@end(deflist)
+@end(section)
+
+@begin(section)
+@title(Overview)
+
+The @b(binary) package was written to parse and serialise certain
+network messages while working on implementing a client library for a
+certain protocol in Common Lisp.
+
+@code(@include[path=example.lisp]())
+@end(section)
+
+@begin(section)
+@title(API Reference)
+
+@cl:with-package[name="binary"](
+@cl:doc(function read-U8)
+@cl:doc(function read-U16)
+@cl:doc(function read-U32)
+@cl:doc(function read-U64)
+@cl:doc(function read-I8)
+@cl:doc(function read-I16)
+@cl:doc(function read-I32)
+@cl:doc(function read-I64)
+@cl:doc(function write-U8)
+@cl:doc(function write-U16)
+@cl:doc(function write-U32)
+@cl:doc(function write-U64)
+@cl:doc(function write-I8)
+@cl:doc(function write-I16)
+@cl:doc(function write-I32)
+@cl:doc(function write-I64))
+
+@end(section)
